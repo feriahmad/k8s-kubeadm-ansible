@@ -41,16 +41,33 @@
     - { name: 'net.ipv4.ip_forward', value: '1' }
   become: true
 
-- name: Add Kubernetes apt key
-  ansible.builtin.shell: |
-    curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+# Install Kubernetes packages directly using dpkg
+- name: Create temporary directory for Kubernetes packages
+  ansible.builtin.file:
+    path: /tmp/kubernetes-packages
+    state: directory
+    mode: '0755'
   become: true
 
-- name: Add Kubernetes repository
-  ansible.builtin.apt_repository:
-    repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
-    state: present
-    filename: kubernetes
+- name: Download kubelet package
+  ansible.builtin.get_url:
+    url: "https://storage.googleapis.com/kubernetes-release/release/v{{ kubernetes_version }}/bin/linux/amd64/kubelet"
+    dest: /usr/local/bin/kubelet
+    mode: '0755'
+  become: true
+
+- name: Download kubeadm package
+  ansible.builtin.get_url:
+    url: "https://storage.googleapis.com/kubernetes-release/release/v{{ kubernetes_version }}/bin/linux/amd64/kubeadm"
+    dest: /usr/local/bin/kubeadm
+    mode: '0755'
+  become: true
+
+- name: Download kubectl package
+  ansible.builtin.get_url:
+    url: "https://storage.googleapis.com/kubernetes-release/release/v{{ kubernetes_version }}/bin/linux/amd64/kubectl"
+    dest: /usr/local/bin/kubectl
+    mode: '0755'
   become: true
 
 - name: Install containerd
@@ -85,27 +102,62 @@
     daemon_reload: true
   become: true
 
-- name: Install Kubernetes packages
-  ansible.builtin.apt:
-    name:
-      - kubelet={{ kubernetes_package_version }}
-      - kubeadm={{ kubernetes_package_version }}
-      - kubectl={{ kubernetes_package_version }}
-    state: present
+# Create systemd service file for kubelet
+- name: Create kubelet service file
+  ansible.builtin.copy:
+    content: |
+      [Unit]
+      Description=kubelet: The Kubernetes Node Agent
+      Documentation=https://kubernetes.io/docs/
+      Wants=network-online.target
+      After=network-online.target
+
+      [Service]
+      ExecStart=/usr/local/bin/kubelet
+      Restart=always
+      StartLimitInterval=0
+      RestartSec=10
+
+      [Install]
+      WantedBy=multi-user.target
+    dest: /etc/systemd/system/kubelet.service
+    mode: '0644'
   become: true
 
-- name: Hold Kubernetes packages
-  ansible.builtin.dpkg_selections:
-    name: "{{ item }}"
-    selection: hold
-  with_items:
-    - kubelet
-    - kubeadm
-    - kubectl
+- name: Create kubelet service directory
+  ansible.builtin.file:
+    path: /etc/systemd/system/kubelet.service.d
+    state: directory
+    mode: '0755'
+  become: true
+
+- name: Create kubelet service config
+  ansible.builtin.copy:
+    content: |
+      [Service]
+      Environment="KUBELET_KUBECONFIG_ARGS=--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf"
+      Environment="KUBELET_CONFIG_ARGS=--config=/var/lib/kubelet/config.yaml"
+      # This is a file that "kubeadm init" and "kubeadm join" generates at runtime, populating the KUBELET_KUBEADM_ARGS variable dynamically
+      EnvironmentFile=-/var/lib/kubelet/kubeadm-flags.env
+      # This is a file that the user can use for overrides of the kubelet args as a last resort. Preferably, the user should use
+      # the .NodeRegistration.KubeletExtraArgs object in the configuration files instead. KUBELET_EXTRA_ARGS should be sourced from this file.
+      EnvironmentFile=-/etc/default/kubelet
+      ExecStart=
+      ExecStart=/usr/local/bin/kubelet $KUBELET_KUBECONFIG_ARGS $KUBELET_CONFIG_ARGS $KUBELET_KUBEADM_ARGS $KUBELET_EXTRA_ARGS
+    dest: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+    mode: '0644'
+  become: true
+
+- name: Create kubelet directory
+  ansible.builtin.file:
+    path: /var/lib/kubelet
+    state: directory
+    mode: '0755'
   become: true
 
 - name: Enable kubelet service
   ansible.builtin.systemd:
     name: kubelet
     enabled: true
+    daemon_reload: true
   become: true

@@ -147,9 +147,9 @@ If you encounter issues during deployment:
    journalctl -xeu kubelet
    ```
 
-### Repository Information
+### Installation Method
 
-This playbook uses the traditional Kubernetes repository from `https://apt.kubernetes.io/` with the `kubernetes-xenial` distribution. This repository is compatible with Ubuntu 22.04 systems and provides access to Kubernetes 1.30.0 packages.
+This playbook installs Kubernetes components (kubelet, kubeadm, kubectl) directly from the official Google Cloud Storage bucket instead of using apt repositories. This approach avoids potential repository compatibility issues with Ubuntu 22.04 and ensures you get the exact version specified.
 
 ## License
 
