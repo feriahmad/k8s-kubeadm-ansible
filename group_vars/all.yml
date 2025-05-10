@@ -1,7 +1,7 @@
 ---
 # Kubernetes version
-kubernetes_version: "1.32.0"
-kubernetes_package_version: "1.32.0-00"
+kubernetes_version: "1.30.0"
+kubernetes_package_version: "1.30.0-00"
 
 # Container runtime
 container_runtime: "containerd"

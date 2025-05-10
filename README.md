@@ -149,7 +149,7 @@ If you encounter issues during deployment:
 
 ### Repository Information
 
-This playbook uses the official Kubernetes repository for version 1.32 from `https://pkgs.k8s.io/core:/stable:/v1.32/deb/`. This is the recommended repository for installing Kubernetes 1.32.x on Ubuntu systems.
+This playbook uses the official Kubernetes repository for version 1.30 from `https://pkgs.k8s.io/core:/stable:/v1.30/deb/`. This is the recommended repository for installing Kubernetes 1.30.x on Ubuntu systems.
 
 ## License
 
