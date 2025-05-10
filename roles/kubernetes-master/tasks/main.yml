@@ -58,7 +58,7 @@
     join_command: "{{ join_command.stdout }}"
 
 - name: Install Calico network plugin
-  ansible.builtin.shell: kubectl apply -f https://docs.projectcalico.org/{{ calico_version }}/manifests/calico.yaml
+  ansible.builtin.shell: kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/{{ calico_version }}/manifests/calico.yaml
   when: cni_plugin == "calico"
   become: true
 

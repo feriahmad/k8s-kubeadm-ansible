@@ -157,6 +157,8 @@ The playbook also installs all required dependencies for Kubernetes:
 - socat (required for port forwarding)
 - conntrack (required for network connection tracking)
 
+For networking, the playbook installs Calico CNI plugin directly from the official GitHub repository.
+
 ## License
 
 MIT
