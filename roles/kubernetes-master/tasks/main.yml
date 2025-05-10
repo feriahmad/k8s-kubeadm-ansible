@@ -1,0 +1,100 @@
+---
+# Tasks for Kubernetes master nodes
+
+- name: Initialize Kubernetes cluster
+  ansible.builtin.shell: >
+    kubeadm init 
+    --apiserver-advertise-address={{ kubernetes_api_server_ip }} 
+    --apiserver-cert-extra-sans={{ kubernetes_api_server_ip }} 
+    --pod-network-cidr={{ pod_network_cidr }} 
+    --service-cidr={{ service_cidr }} 
+    --node-name={{ node_name }} 
+    --kubernetes-version={{ kubernetes_version }}
+  register: kubeadm_init
+  become: true
+  args:
+    creates: /etc/kubernetes/admin.conf
+
+- name: Create .kube directory for root user
+  ansible.builtin.file:
+    path: /root/.kube
+    state: directory
+    mode: '0755'
+  become: true
+
+- name: Copy admin.conf to root's .kube/config
+  ansible.builtin.copy:
+    src: /etc/kubernetes/admin.conf
+    dest: /root/.kube/config
+    remote_src: yes
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+
+- name: Create .kube directory for default user
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.kube"
+    state: directory
+    mode: '0755'
+
+- name: Copy admin.conf to user's .kube/config
+  ansible.builtin.copy:
+    src: /etc/kubernetes/admin.conf
+    dest: "{{ ansible_env.HOME }}/.kube/config"
+    remote_src: yes
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0644'
+  become: true
+
+- name: Get join command
+  ansible.builtin.shell: kubeadm token create --print-join-command
+  register: join_command
+  become: true
+
+- name: Set join command fact
+  ansible.builtin.set_fact:
+    join_command: "{{ join_command.stdout }}"
+
+- name: Install Calico network plugin
+  ansible.builtin.shell: kubectl apply -f https://docs.projectcalico.org/{{ calico_version }}/manifests/calico.yaml
+  when: cni_plugin == "calico"
+  become: true
+
+- name: Wait for all nodes to be ready
+  ansible.builtin.shell: kubectl get nodes | grep Ready | wc -l
+  register: ready_nodes
+  until: ready_nodes.stdout | int >= 1
+  retries: 10
+  delay: 30
+  become: true
+
+- name: Wait for coredns pods to be ready
+  ansible.builtin.shell: kubectl get pods -n kube-system -l k8s-app=kube-dns -o jsonpath='{.items[*].status.phase}' | grep Running | wc -w
+  register: coredns_ready
+  until: coredns_ready.stdout | int >= 2
+  retries: 10
+  delay: 30
+  become: true
+
+- name: Create join command file
+  ansible.builtin.copy:
+    content: "{{ join_command }}"
+    dest: /tmp/kubeadm_join_cmd.sh
+    mode: '0755'
+  become: true
+
+- name: Fetch join command file
+  ansible.builtin.fetch:
+    src: /tmp/kubeadm_join_cmd.sh
+    dest: /tmp/kubeadm_join_cmd.sh
+    flat: yes
+  become: true
+
+- name: Fetch kubeconfig file
+  ansible.builtin.fetch:
+    src: /etc/kubernetes/admin.conf
+    dest: /tmp/kubernetes-admin.conf
+    flat: yes
+  become: true

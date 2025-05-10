@@ -1,0 +1,48 @@
+---
+# Main Ansible playbook for Kubernetes cluster deployment
+
+- name: Apply common configuration to all nodes
+  hosts: kubernetes
+  become: true
+  roles:
+    - common
+
+- name: Configure Kubernetes master nodes
+  hosts: kube_masters
+  become: true
+  roles:
+    - kubernetes-master
+
+- name: Configure Kubernetes worker nodes
+  hosts: kube_workers
+  become: true
+  roles:
+    - kubernetes-worker
+
+- name: Verify Kubernetes cluster
+  hosts: kube_masters[0]
+  become: true
+  tasks:
+    - name: Get cluster info
+      ansible.builtin.shell: kubectl cluster-info
+      register: cluster_info
+      
+    - name: Display cluster info
+      ansible.builtin.debug:
+        var: cluster_info.stdout_lines
+        
+    - name: Get nodes status
+      ansible.builtin.shell: kubectl get nodes -o wide
+      register: nodes_status
+      
+    - name: Display nodes status
+      ansible.builtin.debug:
+        var: nodes_status.stdout_lines
+        
+    - name: Get pods status
+      ansible.builtin.shell: kubectl get pods --all-namespaces
+      register: pods_status
+      
+    - name: Display pods status
+      ansible.builtin.debug:
+        var: pods_status.stdout_lines

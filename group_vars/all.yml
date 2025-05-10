@@ -1,0 +1,38 @@
+---
+# Kubernetes version
+kubernetes_version: "1.32.0"
+kubernetes_package_version: "1.32.0-00"
+
+# Container runtime
+container_runtime: "containerd"
+containerd_version: "1.6.12"
+
+# Network settings
+pod_network_cidr: "10.244.0.0/16"
+service_cidr: "10.96.0.0/12"
+kubernetes_api_server_ip: "{{ hostvars[groups['kube_masters'][0]]['ansible_host'] }}"
+kubernetes_api_server_port: 6443
+
+# CNI plugin
+cni_plugin: "calico"
+calico_version: "v3.25.0"
+
+# Kubernetes control plane settings
+control_plane_endpoint: "{{ kubernetes_api_server_ip }}:{{ kubernetes_api_server_port }}"
+
+# Node settings
+node_name: "{{ inventory_hostname }}"
+
+# Swap should be disabled for Kubernetes
+disable_swap: true
+
+# Firewall configuration
+configure_firewall: true
+
+# System settings
+system_packages:
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - gnupg
+  - lsb-release

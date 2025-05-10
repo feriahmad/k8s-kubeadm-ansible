@@ -1,0 +1,71 @@
+---
+# Tasks for Kubernetes worker nodes
+
+- name: Check if node is already joined
+  ansible.builtin.shell: kubectl get nodes | grep {{ node_name }}
+  register: node_check
+  changed_when: false
+  failed_when: false
+  delegate_to: "{{ groups['kube_masters'][0] }}"
+  become: true
+
+- name: Copy join command from master
+  ansible.builtin.copy:
+    src: /tmp/kubeadm_join_cmd.sh
+    dest: /tmp/kubeadm_join_cmd.sh
+    mode: '0755'
+  when: node_check.rc != 0
+  become: true
+
+- name: Join the cluster
+  ansible.builtin.shell: /tmp/kubeadm_join_cmd.sh
+  when: node_check.rc != 0
+  become: true
+
+- name: Remove join command file
+  ansible.builtin.file:
+    path: /tmp/kubeadm_join_cmd.sh
+    state: absent
+  become: true
+
+- name: Wait for node to be ready
+  ansible.builtin.shell: kubectl get nodes {{ node_name }} | grep Ready
+  register: node_ready
+  until: node_ready.rc == 0
+  retries: 10
+  delay: 30
+  delegate_to: "{{ groups['kube_masters'][0] }}"
+  become: true
+  when: node_check.rc != 0
+
+# Distribute kubeconfig to worker nodes
+- name: Create .kube directory for root user
+  ansible.builtin.file:
+    path: /root/.kube
+    state: directory
+    mode: '0755'
+  become: true
+
+- name: Copy kubeconfig to root's .kube/config
+  ansible.builtin.copy:
+    src: /tmp/kubernetes-admin.conf
+    dest: /root/.kube/config
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+
+- name: Create .kube directory for default user
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.kube"
+    state: directory
+    mode: '0755'
+
+- name: Copy kubeconfig to user's .kube/config
+  ansible.builtin.copy:
+    src: /tmp/kubernetes-admin.conf
+    dest: "{{ ansible_env.HOME }}/.kube/config"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0644'
+  become: true
