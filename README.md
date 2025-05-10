@@ -58,7 +58,7 @@ kube_workers:
       ansible_host: 10.184.0.5
       ansible_user: ubuntu
     kangdeploy-worker2:
-      ansible_host: 10.184.0.6
+      ansible_host: 10.148.0.2
       ansible_user: ubuntu
 
 kubernetes:
