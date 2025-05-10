@@ -13,6 +13,24 @@
     state: present
   become: true
 
+- name: Install additional dependencies for kubeadm
+  ansible.builtin.apt:
+    name:
+      - socat
+      - conntrack
+    state: present
+  become: true
+
+- name: Download and install crictl
+  ansible.builtin.shell: |
+    VERSION="v1.28.0"
+    wget -q https://github.com/kubernetes-sigs/cri-tools/releases/download/$VERSION/crictl-$VERSION-linux-amd64.tar.gz
+    tar zxf crictl-$VERSION-linux-amd64.tar.gz -C /usr/local/bin
+    rm -f crictl-$VERSION-linux-amd64.tar.gz
+  args:
+    creates: /usr/local/bin/crictl
+  become: true
+
 - name: Disable swap and remove from fstab
   ansible.builtin.shell: |
     swapoff -a

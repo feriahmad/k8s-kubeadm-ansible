@@ -151,6 +151,12 @@ If you encounter issues during deployment:
 
 This playbook installs Kubernetes components (kubelet, kubeadm, kubectl) directly from the official Google Cloud Storage bucket instead of using apt repositories. This approach avoids potential repository compatibility issues with Ubuntu 22.04 and ensures you get the exact version specified.
 
+The playbook also installs all required dependencies for Kubernetes:
+- containerd (container runtime)
+- crictl (CRI command-line tool)
+- socat (required for port forwarding)
+- conntrack (required for network connection tracking)
+
 ## License
 
 MIT
