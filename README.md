@@ -6,11 +6,45 @@ This repository contains Ansible playbooks to automate the deployment of a Kuber
 
 - Ubuntu 22.04 on all nodes
 - SSH access to all nodes
-- Ansible 2.18.5 installed on the control node
+- Ansible 8.6.1 installed on the control node
 - Minimum requirements for each node:
   - 2 CPU cores
   - 2 GB RAM
   - 20 GB disk space
+
+### Installing Ansible 8.6.1
+
+To install Ansible 8.6.1 on the control node, run the following commands:
+
+```bash
+# Install Python3 and pip if not already installed
+sudo apt update
+sudo apt install -y python3 python3-pip
+
+# Install Ansible 8.6.1 using pip
+pip3 install ansible==8.6.1
+
+# Verify the installation
+ansible --version
+```
+
+Alternatively, you can install Ansible in a Python virtual environment:
+
+```bash
+# Install Python3 and venv if not already installed
+sudo apt update
+sudo apt install -y python3 python3-venv
+
+# Create and activate a virtual environment
+python3 -m venv ansible-env
+source ansible-env/bin/activate
+
+# Install Ansible 8.6.1 in the virtual environment
+pip install ansible==8.6.1
+
+# Verify the installation
+ansible --version
+```
 
 ## Cluster Architecture
 
@@ -21,19 +55,31 @@ This repository contains Ansible playbooks to automate the deployment of a Kuber
 
 ### Inventory
 
-Edit the `inventory/hosts.ini` file to specify your master and worker nodes:
+Edit the `inventory/hosts.yaml` file to specify your master and worker nodes:
 
-```ini
-[kube_masters]
-kangdeploy-master1 ansible_host=10.184.0.2 ansible_user=ubuntu
+```yaml
+---
+# Kubernetes Cluster Inventory
 
-[kube_workers]
-kangdeploy-worker1 ansible_host=10.184.0.5 ansible_user=ubuntu
-kangdeploy-worker2 ansible_host=10.184.0.6 ansible_user=ubuntu
+kube_masters:
+  hosts:
+    kangdeploy-master1:
+      ansible_host: 10.184.0.2
+      ansible_user: ubuntu
 
-[kubernetes:children]
-kube_masters
-kube_workers
+kube_workers:
+  hosts:
+    kangdeploy-worker1:
+      ansible_host: 10.184.0.5
+      ansible_user: ubuntu
+    kangdeploy-worker2:
+      ansible_host: 10.184.0.6
+      ansible_user: ubuntu
+
+kubernetes:
+  children:
+    kube_masters:
+    kube_workers:
 ```
 
 ### Variables
@@ -50,13 +96,13 @@ Edit the `group_vars/all.yml` file to customize your Kubernetes deployment:
 ### 1. Verify SSH connectivity to all nodes
 
 ```bash
-ansible -i inventory/hosts.ini all -m ping
+ansible -i inventory/hosts.yaml all -m ping
 ```
 
 ### 2. Deploy the Kubernetes cluster
 
 ```bash
-ansible-playbook -i inventory/hosts.ini site.yml
+ansible-playbook -i inventory/hosts.yaml site.yml
 ```
 
 ### 3. Verify the deployment
