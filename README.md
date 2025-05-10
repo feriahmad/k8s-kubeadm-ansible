@@ -115,6 +115,10 @@ kubectl cluster-info
 
 The kubeconfig file is automatically distributed to all nodes, and the KUBECONFIG environment variable is set in the .bashrc file for both root and regular users, allowing you to use kubectl commands from any node in the cluster without specifying the kubeconfig file path.
 
+#### Verification Example: Nodes Ready
+
+![Nodes Ready](kubectl%20get%20nodes%20ready.gif)
+
 ### 4. Deploy a test application
 
 To verify that the cluster is working correctly, deploy the Nginx test application:
@@ -129,6 +133,10 @@ Check that the pods are running:
 kubectl get pods
 kubectl get services
 ```
+
+#### Verification Example: Nginx Deployment
+
+![Nginx Deployment](deploy%20nginx%20app.gif)
 
 ## Roles
 
