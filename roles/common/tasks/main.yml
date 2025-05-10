@@ -41,23 +41,14 @@
     - { name: 'net.ipv4.ip_forward', value: '1' }
   become: true
 
-- name: Create directory for Kubernetes apt key
-  ansible.builtin.file:
-    path: /etc/apt/keyrings
-    state: directory
-    mode: '0755'
-  become: true
-
-- name: Download Kubernetes apt key
-  ansible.builtin.get_url:
-    url: https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key
-    dest: /etc/apt/keyrings/kubernetes-archive-keyring.gpg
-    mode: '0644'
+- name: Add Kubernetes apt key
+  ansible.builtin.shell: |
+    curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
   become: true
 
 - name: Add Kubernetes repository
   ansible.builtin.apt_repository:
-    repo: deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /
+    repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
     state: present
     filename: kubernetes
   become: true

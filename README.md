@@ -149,7 +149,7 @@ If you encounter issues during deployment:
 
 ### Repository Information
 
-This playbook uses the official Kubernetes repository for version 1.30 from `https://pkgs.k8s.io/core:/stable:/v1.30/deb/`. This is the recommended repository for installing Kubernetes 1.30.x on Ubuntu systems.
+This playbook uses the traditional Kubernetes repository from `https://apt.kubernetes.io/` with the `kubernetes-xenial` distribution. This repository is compatible with Ubuntu 22.04 systems and provides access to Kubernetes 1.30.0 packages.
 
 ## License
 
