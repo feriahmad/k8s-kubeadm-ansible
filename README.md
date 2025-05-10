@@ -113,7 +113,7 @@ kubectl get nodes
 kubectl cluster-info
 ```
 
-The kubeconfig file is automatically distributed to all nodes, allowing you to use kubectl commands from any node in the cluster.
+The kubeconfig file is automatically distributed to all nodes, and the KUBECONFIG environment variable is set in the .bashrc file for both root and regular users, allowing you to use kubectl commands from any node in the cluster without specifying the kubeconfig file path.
 
 ### 4. Deploy a test application
 

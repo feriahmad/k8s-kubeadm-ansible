@@ -69,3 +69,30 @@
     group: "{{ ansible_user }}"
     mode: '0644'
   become: true
+
+- name: Set KUBECONFIG environment variable for root
+  ansible.builtin.lineinfile:
+    path: /root/.bashrc
+    line: 'export KUBECONFIG=/root/.kube/config'
+    state: present
+  become: true
+
+- name: Set KUBECONFIG environment variable for user
+  ansible.builtin.lineinfile:
+    path: "{{ ansible_env.HOME }}/.bashrc"
+    line: 'export KUBECONFIG={{ ansible_env.HOME }}/.kube/config'
+    state: present
+  become: true
+
+- name: Source bashrc for root
+  ansible.builtin.shell: source /root/.bashrc
+  args:
+    executable: /bin/bash
+  become: true
+  changed_when: false
+
+- name: Source bashrc for user
+  ansible.builtin.shell: source {{ ansible_env.HOME }}/.bashrc
+  args:
+    executable: /bin/bash
+  changed_when: false
