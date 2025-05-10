@@ -57,7 +57,7 @@
 
 - name: Add Kubernetes repository
   ansible.builtin.apt_repository:
-    repo: deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-jammy main
+    repo: deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main
     state: present
     filename: kubernetes
   become: true
