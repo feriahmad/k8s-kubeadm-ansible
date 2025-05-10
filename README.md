@@ -6,45 +6,30 @@ This repository contains Ansible playbooks to automate the deployment of a Kuber
 
 - Ubuntu 22.04 on all nodes
 - SSH access to all nodes
-- Ansible 8.6.1 installed on the control node
+- Ansible 2.15.13 installed on the control node
 - Minimum requirements for each node:
   - 2 CPU cores
   - 2 GB RAM
   - 20 GB disk space
 
-### Installing Ansible 8.6.1
+### Installing Ansible 2.15.13
 
-To install Ansible 8.6.1 on the control node, run the following commands:
+To install Ansible 2.15.13 on the control node, run the following commands:
 
 ```bash
-# Install Python3 and pip if not already installed
+# Add the Ansible PPA repository
 sudo apt update
-sudo apt install -y python3 python3-pip
+sudo apt install -y software-properties-common
+sudo add-apt-repository --yes --update ppa:ansible/ansible
 
-# Install Ansible 8.6.1 using pip
-pip3 install ansible==8.6.1
+# Install Ansible
+sudo apt install -y ansible
 
 # Verify the installation
 ansible --version
 ```
 
-Alternatively, you can install Ansible in a Python virtual environment:
-
-```bash
-# Install Python3 and venv if not already installed
-sudo apt update
-sudo apt install -y python3 python3-venv
-
-# Create and activate a virtual environment
-python3 -m venv ansible-env
-source ansible-env/bin/activate
-
-# Install Ansible 8.6.1 in the virtual environment
-pip install ansible==8.6.1
-
-# Verify the installation
-ansible --version
-```
+This will install Ansible via apt. Make sure the installed version is 2.15.13 or compatible.
 
 ## Cluster Architecture
 
