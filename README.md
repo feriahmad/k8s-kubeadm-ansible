@@ -147,9 +147,9 @@ If you encounter issues during deployment:
    journalctl -xeu kubelet
    ```
 
-### Repository Compatibility
+### Repository Information
 
-This playbook uses the Kubernetes `kubernetes-xenial` repository even on Ubuntu 22.04 (jammy) systems. This is because the Kubernetes project currently doesn't provide a specific repository for Ubuntu 22.04, but the xenial repository packages are compatible with newer Ubuntu versions.
+This playbook uses the official Kubernetes repository for version 1.32 from `https://pkgs.k8s.io/core:/stable:/v1.32/deb/`. This is the recommended repository for installing Kubernetes 1.32.x on Ubuntu systems.
 
 ## License
 

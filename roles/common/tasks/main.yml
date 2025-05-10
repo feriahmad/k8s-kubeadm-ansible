@@ -50,14 +50,14 @@
 
 - name: Download Kubernetes apt key
   ansible.builtin.get_url:
-    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    url: https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key
     dest: /etc/apt/keyrings/kubernetes-archive-keyring.gpg
     mode: '0644'
   become: true
 
 - name: Add Kubernetes repository
   ansible.builtin.apt_repository:
-    repo: deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main
+    repo: deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /
     state: present
     filename: kubernetes
   become: true
