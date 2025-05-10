@@ -81,14 +81,27 @@ Edit the `group_vars/all.yml` file to customize your Kubernetes deployment:
 ### 1. Verify SSH connectivity to all nodes
 
 ```bash
-ansible -i inventory/hosts.yaml all -m ping
+ansible all -m ping
 ```
+
+Note: Since we've set the default inventory in `ansible.cfg`, you don't need to specify the inventory file with `-i`.
+
+When connecting to hosts for the first time, you'll be prompted to verify the SSH host keys. This repository includes an `ansible.cfg` file that disables host key checking by default, so you won't be prompted to verify host keys. If you still see prompts, you can handle them in several ways:
+
+1. Manually accept the host keys by answering "yes" to the prompts
+2. Disable host key checking temporarily:
+   ```bash
+   ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yaml all -m ping
+   ```
+3. Ensure you're running the command from the repository root directory where the `ansible.cfg` file is located
 
 ### 2. Deploy the Kubernetes cluster
 
 ```bash
-ansible-playbook -i inventory/hosts.yaml site.yml
+ansible-playbook site.yml
 ```
+
+Note: Since we've set the default inventory in `ansible.cfg`, you don't need to specify the inventory file with `-i`.
 
 ### 3. Verify the deployment
 
