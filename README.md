@@ -1,4 +1,4 @@
-# Kubernetes Cluster Deployment with Ansible and kubeadm
+# Kubernetes Cluster Deployment with Ansible and Kubeadm
 
 This repository contains Ansible playbooks to automate the deployment of a Kubernetes cluster using kubeadm.
 
